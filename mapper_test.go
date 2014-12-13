@@ -8,12 +8,12 @@ import "github.com/rubenv/utf8mapper"
 
 func TestMapper(t *testing.T) {
 	var lower int32 = 0
-	var upper int32 = 1000
+	var upper int32 = math.MaxInt32
 	result, err := utf8mapper.MapString("test", lower, upper)
 	if err != nil {
 		t.Error(err)
 	}
-	if result == 0 || result == 1000 {
+	if result == 0 || result == upper {
 		t.Errorf("Result (%d) should be between lower (%d) and upper (%d)", result, lower, upper)
 	}
 }
