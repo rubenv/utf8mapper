@@ -5,7 +5,7 @@ import "unicode/utf8"
 // Maps a string to an index between upper and lower (exclusive), such that the
 // chance of collisions is minimal.
 //
-// Distribution of characterss:
+// Distribution of characters:
 //  - 0000  - 00FF:   40% (ASCII + some Latin1)
 //  - 0100  - 01FF:   10% (Latin extended)
 //  - 0200  - 1FFF:   10% (Remaining basic languages)
