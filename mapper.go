@@ -25,35 +25,38 @@ import "unicode/utf8"
 func MapString(str string, lower, upper int32) (int32, error) {
 	var result int32 = 0
 	var start float64 = 0
+	var end float64 = 0
 	var allocation float64 = 0
 
 	r, _ := utf8.DecodeRune([]byte(str))
 	if r <= '\u00FF' {
 		allocation = 0.4
 		start = 0
+		end = '\u00FF'
 	} else {
 		allocation = 0.1
 		if r <= '\u01FF' {
-			start = '\u0100'
 			start = 0.4
+			end = '\u01FF'
 		} else if r <= '\u1FFF' {
-			start = '\u0200'
 			start = 0.5
+			end = '\u1FFF'
 		} else if r <= '\uFFFF' {
-			start = '\u2000'
 			start = 0.6
+			end = '\uFFFF'
 		} else if r <= '\U0001FFFF' {
-			start = '\U00010000'
 			start = 0.7
+			end = '\U0001FFFF'
 		} else if r <= '\U0002FFFF' {
-			start = '\U00020000'
 			start = 0.8
+			end = '\U0002FFFF'
 		} else {
 			start = 0.9
+			end = utf8.MaxRune
 		}
 	}
 
-	position := float64(r) / utf8.MaxRune
+	position := float64(r) / end
 	outputLength := float64(upper - lower)
 	allocationStart := outputLength * start
 	assignedPosition := outputLength * allocation * position

@@ -3,6 +3,7 @@ package utf8mapper_test
 import (
 	"math"
 	"testing"
+	"unicode/utf8"
 )
 import "github.com/rubenv/utf8mapper"
 
@@ -12,7 +13,7 @@ func testMapping(t *testing.T, input string, lower, upper, expected int32) {
 		t.Error(err)
 	}
 	if result != expected {
-		t.Errorf("Result %d should be %d", result, expected)
+		t.Errorf("Result %d should be %d (input: %+q)", result, expected, input)
 	}
 }
 
@@ -34,6 +35,13 @@ func TestLower(t *testing.T) {
 
 func TestUpper(t *testing.T) {
 	testMapping(t, "\U0010FFFF", 0, math.MaxInt32, math.MaxInt32)
+}
+
+func TestLatin(t *testing.T) {
+	for i := 0; i <= '\xFF'; i++ {
+		output := float64(utf8.MaxRune*0.4) / 256 * float64(i)
+		testMapping(t, string(i), 0, utf8.MaxRune, int32(output))
+	}
 }
 
 func BenchmarkHello(b *testing.B) {
