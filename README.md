@@ -14,7 +14,7 @@ func MapString(str string, lower, upper int32) (int32, error)
 Maps a string to an index between upper and lower (exclusive), such that the
 chance of collisions is minimal.
 
-Distribution of characterss:
+Distribution of characters:
 
     - 0000  - 00FF:   40% (ASCII + some Latin1)
     - 0100  - 01FF:   10% (Latin extended)
