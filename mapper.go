@@ -59,7 +59,7 @@ func MapString(str string, lower, upper int32) (int32, error) {
 func rangeParams(r rune) (allocation, allocationStart float64, start, end int32) {
 	allocation = 0.1
 	if r > '\uFFFF' && r <= '\U0002FFFF' {
-		allocation = 0.5
+		allocation = 0.05
 	}
 
 	switch {
