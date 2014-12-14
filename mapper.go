@@ -5,7 +5,7 @@ import (
 	"unicode/utf8"
 )
 
-// Maps a string to an index between upper and lower (exclusive), such that the
+// Maps a string to an index between lower and upper (inclusive), such that the
 // chance of collisions is minimal.
 //
 // Distribution of characters:
