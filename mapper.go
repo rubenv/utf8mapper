@@ -1,6 +1,9 @@
 package utf8mapper
 
-import "unicode/utf8"
+import (
+	"errors"
+	"unicode/utf8"
+)
 
 // Maps a string to an index between upper and lower (exclusive), such that the
 // chance of collisions is minimal.
@@ -28,6 +31,9 @@ func MapString(str string, lower, upper int32) (int32, error) {
 	outputLength := upper - lower
 
 	r, _ := utf8.DecodeRune([]byte(str))
+	if r == utf8.RuneError {
+		return 0, errors.New("Bad unicode!")
+	}
 	if r <= '\u00FF' {
 		// position = r / 256
 		// result = outputLength / 2 * position

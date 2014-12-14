@@ -3,6 +3,7 @@ package utf8mapper_test
 import (
 	"math"
 	"testing"
+	"unicode/utf8"
 )
 import "github.com/rubenv/utf8mapper"
 
@@ -42,15 +43,28 @@ func TestLatin(t *testing.T) {
 	}
 }
 
-func TestEdges(t *testing.T) {
-	edges := []rune{'\u00FF', '\u01FF', '\u1FFF', '\uFFFF', '\U0001FFFF', '\U0002FFFF'}
+func TestOutputRange(t *testing.T) {
 	var lower int32 = 0
 	var upper int32 = math.MaxInt32
-	for edge := range edges {
-		result, _ := utf8mapper.MapString(string(edge), lower, upper)
-		result2, _ := utf8mapper.MapString(string(edge+1), lower, upper)
+	for i := 0; i < utf8.MaxRune; i++ {
+		result, _ := utf8mapper.MapString(string(i), lower, upper)
+		if result < lower || result > upper {
+			t.Fatalf("Result not in output range: %d (%d)", i, result)
+		}
+	}
+}
+
+func TestIncreasing(t *testing.T) {
+	var lower int32 = 0
+	var upper int32 = math.MaxInt32
+	for i := 0; i < utf8.MaxRune; i++ {
+		result, err1 := utf8mapper.MapString(string(i), lower, upper)
+		result2, err2 := utf8mapper.MapString(string(i+1), lower, upper)
+		if err1 != nil || err2 != nil {
+			continue // Skip bad Unicode
+		}
 		if result >= result2 {
-			t.Errorf("Overlapping results around edges!")
+			t.Fatalf("Overlapping results around %d: %d - %d", i, result, result2)
 		}
 	}
 }
