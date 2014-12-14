@@ -47,7 +47,7 @@ When mapping from 0 to math.MaxInt32, this gives us:
     - 20000 - 2FFFF:   65536 code points,    1638 slots per code point
     - 30000 - 10FFFF: 917504 code points,     234 slots per code point
 
-## License 
+## License
 
     (The MIT License)
 

@@ -27,10 +27,14 @@ import (
 //  - 30000 - 10FFFF: 917504 code points,     234 slots per code point
 func MapString(str string, lower, upper int32) (int32, error) {
 	var result int32 = 0
+	var step int32 = 0
 
 	outputLength := upper - lower
+	if outputLength <= 0 {
+		return lower, nil
+	}
 
-	r, _ := utf8.DecodeRune([]byte(str))
+	r, size := utf8.DecodeRune([]byte(str))
 	if r == utf8.RuneError {
 		return 0, errors.New("Bad unicode!")
 	}
@@ -45,8 +49,9 @@ func MapString(str string, lower, upper int32) (int32, error) {
 		// result = outputLength * (1 / 2) * r * (1 / 256)
 		// result = outputLength * r / 512
 		result = int32((int64(outputLength) * int64(r)) >> 9)
+		step = outputLength >> 8 // outputLength / 256
 	} else {
-		allocation, allocationStart, start, end := rangeParams(r)
+		allocation, allocationStart, start, end, codePoints := rangeParams(r)
 		inputLength := end - start
 		position := float64(r-start) / float64(inputLength)
 		// outputStart = outputLength * allocationStart
@@ -58,11 +63,20 @@ func MapString(str string, lower, upper int32) (int32, error) {
 		//
 		// Thus:
 		result = int32(float64(outputLength) * (allocationStart + (allocation * position)))
+		step = outputLength / codePoints
+	}
+
+	if len(str) > size {
+		remainder, err := MapString(str[size:], 0, step-1)
+		if err != nil {
+			return 0, err
+		}
+		result += remainder
 	}
 	return result, nil
 }
 
-func rangeParams(r rune) (allocation, allocationStart float64, start, end int32) {
+func rangeParams(r rune) (allocation, allocationStart float64, start, end, codePoints int32) {
 	allocation = 0.1
 	if r > '\uFFFF' && r <= '\U0002FFFF' {
 		allocation = 0.05
@@ -73,26 +87,32 @@ func rangeParams(r rune) (allocation, allocationStart float64, start, end int32)
 		start = '\u0100'
 		end = '\u01FF'
 		allocationStart = 0.5
+		codePoints = 256
 	case r <= '\u1FFF':
 		start = '\u01FF'
 		end = '\u1FFF'
 		allocationStart = 0.6
+		codePoints = 7680
 	case r <= '\uFFFF':
 		start = '\u1FFF'
 		end = '\uFFFF'
 		allocationStart = 0.7
+		codePoints = 57344
 	case r <= '\U0001FFFF':
 		start = '\uFFFF'
 		end = '\U0001FFFF'
 		allocationStart = 0.8
+		codePoints = 65536
 	case r <= '\U0002FFFF':
 		start = '\U0001FFFF'
 		end = '\U0002FFFF'
 		allocationStart = 0.85
+		codePoints = 65536
 	default:
 		start = '\U0002FFFF'
 		end = utf8.MaxRune
 		allocationStart = 0.9
+		codePoints = 917504
 	}
 	return
 }
