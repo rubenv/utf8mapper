@@ -33,7 +33,7 @@ func TestLower(t *testing.T) {
 }
 
 func TestUpper(t *testing.T) {
-	//testMapping(t, "\U0010FFFF", 0, math.MaxInt32, math.MaxInt32)
+	testMapping(t, "\U0010FFFF", 0, math.MaxInt32, math.MaxInt32)
 }
 
 func TestLatin(t *testing.T) {

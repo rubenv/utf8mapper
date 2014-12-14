@@ -24,9 +24,6 @@ import "unicode/utf8"
 //  - 30000 - 10FFFF: 917504 code points,     234 slots per code point
 func MapString(str string, lower, upper int32) (int32, error) {
 	var result int32 = 0
-	//var start float64 = 0
-	//var end float64 = 0
-	//var allocation float64 = 0
 
 	outputLength := upper - lower
 
@@ -41,42 +38,55 @@ func MapString(str string, lower, upper int32) (int32, error) {
 		// result = (outputLength / 2) * (r / 256)
 		// result = outputLength * (1 / 2) * r * (1 / 256)
 		// result = outputLength * r / 512
-		var inter int64 = int64(outputLength) * int64(r)
-		result = int32(inter >> 9)
+		result = int32((int64(outputLength) * int64(r)) >> 9)
+	} else {
+		allocation, allocationStart, start, end := rangeParams(r)
+		inputLength := end - start
+		position := float64(r-start) / float64(inputLength)
+		// outputStart = outputLength * allocationStart
+		// outputRange = outputLength * allocation
+		// result = outputStart + outputRange * position
+		//
+		// Thus:
+		// result = outputLength * allocationStart + outputLength * allocation * position
+		//
+		// Thus:
+		result = int32(float64(outputLength) * (allocationStart + (allocation * position)))
 	}
-	/*
-		if r <= '\u00FF' {
-			allocation = 0.4
-			start = 0
-			end = '\u00FF'
-		} else {
-			allocation = 0.1
-			if r <= '\u01FF' {
-				start = 0.4
-				end = '\u01FF'
-			} else if r <= '\u1FFF' {
-				start = 0.5
-				end = '\u1FFF'
-			} else if r <= '\uFFFF' {
-				start = 0.6
-				end = '\uFFFF'
-			} else if r <= '\U0001FFFF' {
-				start = 0.7
-				end = '\U0001FFFF'
-			} else if r <= '\U0002FFFF' {
-				start = 0.8
-				end = '\U0002FFFF'
-			} else {
-				start = 0.9
-				end = utf8.MaxRune
-			}
-		}
-
-		position := float64(r) / end
-		outputLength := float64(upper - lower)
-		allocationStart := outputLength * start
-		assignedPosition := outputLength * allocation * position
-		result = int32(allocationStart + assignedPosition)
-	*/
 	return result, nil
+}
+
+func rangeParams(r rune) (allocation, allocationStart float64, start, end int32) {
+	allocation = 0.1
+	if r > '\uFFFF' && r <= '\U0002FFFF' {
+		allocation = 0.5
+	}
+
+	switch {
+	case r <= '\u01FF':
+		start = '\u0100'
+		end = '\u01FF'
+		allocationStart = 0.5
+	case r <= '\u1FFF':
+		start = '\u01FF'
+		end = '\u1FFF'
+		allocationStart = 0.6
+	case r <= '\uFFFF':
+		start = '\u1FFF'
+		end = '\uFFFF'
+		allocationStart = 0.7
+	case r <= '\U0001FFFF':
+		start = '\uFFFF'
+		end = '\U0001FFFF'
+		allocationStart = 0.8
+	case r <= '\U0002FFFF':
+		start = '\U0001FFFF'
+		end = '\U0002FFFF'
+		allocationStart = 0.85
+	default:
+		start = '\U0002FFFF'
+		end = utf8.MaxRune
+		allocationStart = 0.9
+	}
+	return
 }
