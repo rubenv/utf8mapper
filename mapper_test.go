@@ -100,8 +100,8 @@ func TestRecursing2(t *testing.T) {
 		t.Fatal()
 	}
 
-	if result >= result2 {
-		t.Fatalf("Equal mappings: %d - %d", result, result2)
+	if result != result2-1 {
+		t.Fatalf("Didn't recurse sufficiently deep: %d - %d", result, result2)
 	}
 }
 
