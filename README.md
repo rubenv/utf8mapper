@@ -1,12 +1,21 @@
 # utf8mapper
---
-    import "github.com/rubenv/utf8mapper"
 
 [![Build Status](https://travis-ci.org/rubenv/utf8mapper.svg?branch=master)](https://travis-ci.org/rubenv/utf8mapper) [![GoDoc](https://godoc.org/github.com/rubenv/utf8mapper?status.png)](https://godoc.org/github.com/rubenv/utf8mapper)
 
 Maps strings onto an integer output range. Can be used to calculate an ordering
 parameter for a list of items (based on e.g. their name), while attempting to
 minimize the chances of collisions when new items are inserted.
+
+## Installation
+```
+go get github.com/rubenv/utf8mapper
+```
+
+Import into your application with:
+
+```go
+import "github.com/rubenv/utf8mapper"
+```
 
 ## Usage
 
